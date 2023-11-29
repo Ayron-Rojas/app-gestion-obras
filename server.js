@@ -17,14 +17,26 @@ const pool = new Pool({
 
 //filter by user or call user
 app.get('/users', (req, res) => {
-    const listUsersQuery = `SELECT * FROM obrasEnAvance;`;
+    let listUsersQuery = `SELECT * FROM obrasenavance`;
+
+    if (req.query.id) {
+        listUsersQuery += ` WHERE id = ${req.query.id}`;
+    } else if (req.query.usuario) {
+        listUsersQuery += ` WHERE usuario = '${req.query.usuario}'`;
+    } else if (req.query.proyecto) {
+        listUsersQuery += ` WHERE proyecto = '${req.query.proyecto}'`;
+    } else if (req.query.fecha) {
+        listUsersQuery += ` WHERE fecha = '${req.query.fecha}'`;
+    }
+
     pool.query(listUsersQuery)
-        .then(datarows => {
-
-            res.status(200).send({data: datarows.rows})
-
+        .then(data => {
+            res.status(200).send({ data: data.rows });
         })
-
+        .catch(err => {
+            console.error('Error: ', err);
+            res.status(500).send('Error en la consulta');
+        });
 });
 
 
