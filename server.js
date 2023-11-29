@@ -1,38 +1,41 @@
 const express = require('express')
-const app = require (express)
+const app = express()
+const { Pool } = require('pg')
+app.use(express.json())
 
-//filter by user or call user
-    app.get('/users', (req, res) => {
-        let obras = 'SELECT * FROM users';
-
-    
-        if (req.query.filter === 'id') {
-            obras = `SELECT * FROM users WHERE id = '${req.query.value}'`;
-        } else if (req.query.filter === 'project') {
-            obras = `SELECT * FROM users WHERE project = '${req.query.value}'`;
-        } else if (req.query.filter === 'date') {
-            listUsersQuery = `SELECT * FROM users WHERE date = '${req.query.value}'`;
-        }
-
-        pool.query(obras)
-    .then(res2 => {
-        console.log("List baseDate: ", res2.rows);
-        res.status(201)
-        res.send(res2.rows)
-    })
-    .catch(err => {
-        console.error(err);
-        res.status(400)
-        console.log('ha ocurrido un error')
-        res.send('hubo un error')
-    });
+const pool = new Pool({
+    user: 'default',
+    host: 'ep-orange-smoke-08960365.us-east-1.postgres.vercel-storage.com',
+    database: 'verceldb',
+    password: 'bf3BTmnKYd4P',
+    port: 5432,
+    ssl: { rejectUnauthorized: false }
 });
 
 
-app.post('/user',(req,res)=>{
-    const update = `SELET`
+
+
+//filter by user or call user
+app.get('/users', (req, res) => {
+    const listUsersQuery = `SELECT * FROM obrasEnAvance;`;
+    pool.query(listUsersQuery)
+        .then(datarows => {
+
+            res.status(200).send({data: datarows.rows})
+
+        })
+
+});
+
+
+app.post('/user', (req, res) => {
+    const insertSQL = `INSERT INTO obrasenavance (usuario,proyecto,observacion,fecha) VALUES('${req.body.usuario}','${req.body.proyecto}','${req.body.observacion}','${req.body.fecha}')`
+    pool.query(insertSQL)
+        .then(datarows => {})
+
+    res.status(200).send({message:"Registro Exitoso"})
 })
 
-app.listen(3000,()=>{
+app.listen(3000, () => {
     console.log('Server running on port 3000');
 });
