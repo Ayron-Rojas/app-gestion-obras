@@ -16,11 +16,11 @@ const pool = new Pool({
 
 
 //filter by user or call user
-app.get('/users', (req, res) => {
+app.get('/user', (req, res) => {
     let listUsersQuery = `SELECT * FROM obrasenavance`;
 
-    if (req.query.id) {
-        listUsersQuery += ` WHERE id = ${req.query.id}`;
+    if (req.params.id) {
+        listUsersQuery += ` WHERE id = ${req.params.id}`;
     } else if (req.query.usuario) {
         listUsersQuery += ` WHERE usuario = '${req.query.usuario}'`;
     } else if (req.query.proyecto) {
@@ -37,15 +37,43 @@ app.get('/users', (req, res) => {
             console.error('Error: ', err);
             res.status(500).send('Error en la consulta');
         });
-});
+});;
+
 
 
 app.post('/user', (req, res) => {
     const insertSQL = `INSERT INTO obrasenavance (usuario,proyecto,observacion,fecha) VALUES('${req.body.usuario}','${req.body.proyecto}','${req.body.observacion}','${req.body.fecha}')`
     pool.query(insertSQL)
-        .then(datarows => {})
+        .then(data => {
+            res.status(200).send({message:"Registro Exitoso"})
+        })
+        .catch(err=>{
+            res.status(500).send({message:"Registro fallido"})
+        })
 
     res.status(200).send({message:"Registro Exitoso"})
+})
+
+app.put('/user/:id',  (req,res)=>{
+    const modificar = `UPDATE obrasenavance SET usuario='${req.body.usuario}' ,proyecto='${req.body.proyecto}',observacion='${req.body.observacion}',fecha='${req.body.fecha}'WHERE id = '${req.params.id}';`
+    pool.query(modificar)
+    .then(data=>{
+        res.status(200).send({message:"Modificacion Exitosa"})
+    })
+    .catch(err=>{
+        res.status(500).send({message:"modificaccion fallido"})
+    })
+  });
+
+  app.delete('/user/:id',(req,res)=>{
+    const eliminar = `DELETE FROM obrasenavance WHERE id = ${req.params.id}`
+    pool.query(eliminar)
+    .then(data=>{
+        res.status(200).send({message:"Eliminacion Exitoso"})
+    })
+    .catch(err=>{
+        res.status(500).send({message:"modificaccion fallido"})
+    })
 })
 
 app.listen(3000, () => {
